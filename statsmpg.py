@@ -1,5 +1,7 @@
 #here goes the Copyright (c)
 
+"""Read mpg file stats and consolidate data"""
+
 #Python stdlib imports
 import re
 import csv
@@ -8,75 +10,26 @@ import io
 #uses openpyxl for reading excel 
 import openpyxl
 
-
 #Constants
 __csv__player__columns = ['poste', 'nom', 'tit', 'entrees', 'buts', 'team']
 __csv__team__columns = ['sheet', 'name', 'short_name']
-
-#Regex
-team_regex = re.compile(r"-{8}[^0-9]*([0-9]*)[^A-Z]*([A-Z]*).*\n([^,]*)", re.M)
-day_regex = re.compile(r'J[0-9]{2}')
 
 #MPG constants
 _entered_string = "<"
 _injured_string = "Bl."
 
+#Regex
+_team_regex = r"-{8}[^0-9]*([0-9]*)[^A-Z]*([A-Z]*).*\n([^,]*)"
+_day_regex = r"J[0-9]{2}"
+
 #internals
-teams = []
-players = []
-sheet = 0
-current_team = ""
+_teams = []
+_players = []
+_current_team = ""
 _current_day = 1
 _days = []
 
 
-
-class Team:
-    """Team contains all team related properties """
-
-    def __init__(self, sheet, name, short_name, days=[]):
-        self.sheet = sheet
-        self.name = name
-        self.short_name = short_name
-        self.days = days
-
-
-        
-class Note:
-    """Note contains all notation related properties"""
-    
-    def __init__(
-            self,
-            note = None,
-            goals_pos = None,
-            goals_neg = None,
-            entered = False,
-            injured = False):
-        self.note = note
-        self.goals_pos = goals_pos
-        self.goals_neg = goals_neg
-        self.entered = entered
-        self.injured = injured
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    
-
-def team_replacer(match):
-    sheet = int(match.group(1))
-    if sheet == 1:
-        return
-    teams.append(Team(
-        str(sheet),
-        match.group(3),
-        match.group(2)))
-
-
-def update_xlsx(xlsx):
-    csv = xlsx_to_csv(xlsx)
-    _update_from_csv(csv)
-    
 def update(csv = None, players = None, teams = None):
     """update stats
 
@@ -91,9 +44,75 @@ def update(csv = None, players = None, teams = None):
     if csv is not None:
         _update_from_csv(csv)
         return
-
     _update_teams(teams)
     _update_players(players)
+
+
+def init(csv):
+    """
+Init the stats with data provided as csv. 
+The csv layout must follow the layout of the xlsx file provided by mpg.
+This layout is referred as mpg layout.
+"""
+
+    _init()
+    update(csv)
+
+
+#Models    
+class Team:
+    """Team contains all team related properties """
+
+    def __init__(self):
+        self.sheet = ""
+        self.name = ""
+        self.short_name = ""
+        self.days = []
+
+        
+class Note:
+    """Note contains all notation related properties"""
+    
+    def __init__(self):
+        self.note = None
+        self.goals_pos = None
+        self.goals_neg = None
+        self.entered = False
+        self.injured = False
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+
+def team(sheet, name, short_name):
+    "Create a Team"
+    t = Team()
+    t.sheet = sheet
+    t.name = name
+    t.short_name = short_name
+    return t
+
+
+def note(
+        note = None,
+        goals_pos = None,
+        goals_neg = None,
+        entered = False,
+        injured = False):
+    "Create a Note"
+    n = Note()
+    n.note = note
+    n.goals_pos = goals_pos
+    n.goals_neg = goals_neg
+    n.entered = entered
+    n.injured = injured
+    return n
+
+
+def update_xlsx(xlsx):
+    csv = xlsx_to_csv(xlsx)
+    _update_from_csv(csv)
+    
 
 def _update_players(players_csv):
     lines = players_csv.split("\n")[1:]
@@ -102,9 +121,6 @@ def _update_players(players_csv):
         _update_player(line.split(','))
 
 
-def _get_player_properties(tokens, properties = __csv__player__columns):
-    return _get_properties(tokens, properties, __csv__player__columns)
-        
 def _update_player(player_tokens):
     "update player form the line"
     player = {}
@@ -125,10 +141,10 @@ def _are_same_player(player, other):
    
     
 def _get_or_create_player(player):
-    for p in players:
+    for p in _players:
         if _are_same_player(p, player):
             return p
-    players.append(player)
+    _players.append(player)
     return player
     
 def _update_teams(teams_csv):
@@ -149,11 +165,11 @@ def _get_team_properties(tokens, properties):
 
 def _get_or_create_team(sheet, name, short_name):
     "get or create the team"
-    for team in teams:
-        if team.short_name == short_name:
-            return team
-    t = Team(sheet, name, short_name)
-    teams.append(t)
+    for t in _teams:
+        if t.short_name == short_name:
+            return t
+    t = team(sheet, name, short_name)
+    _teams.append(t)
     return t
 
 def _update_team(team_tokens):
@@ -164,24 +180,26 @@ def _update_team(team_tokens):
     
     
 def _update_from_csv(csv):
+    team_regex = re.compile(_team_regex, re.M)
     team_regex.sub(team_replacer, csv)
     lines = get_lines(csv)
     _set_current_day(lines)
     for line in lines:
         parse_line(line)
 
+
+def team_replacer(match):
+    sheet = int(match.group(1))
+    if sheet == 1:
+        return
+    t = team(str(sheet), match.group(3), match.group(2))
+    _teams.append(t)
+
+        
 def clear():
     _init()
     
-def init(csv):
-    """
-Init the stats with data provided as csv. 
-The csv layout must follow the layout of the xlsx file provided by mpg.
-This layout is referred as mpg layout.
-"""
-    _init()
-    #extract teams
-    update(csv)
+
 
 def _first_player_header_line(lines):
     for line in lines:
@@ -200,33 +218,25 @@ def dump():
 def dump_players():
     "dump players as csv"
     res = ",".join(__csv__player__columns) + "\n"
-    return res + "\n".join([_dump_player(player) for player in players])
+    return res + "\n".join([_dump_player(player) for player in _players])
 
 def dump_teams():
     "dump teams as csv"
     columns = __csv__team__columns
-    if len(teams) > 0:
-        columns = columns + [day['day'] for day in teams[0].days]
+    if len(_teams) > 0:
+        columns = columns + [day['day'] for day in _teams[0].days]
     header = ",".join(columns)
-    return header + "\n" + "\n".join([_dump_team(team) for team in teams])
+    return header + "\n" + "\n".join([_dump_team(team) for team in _teams])
 
 def _init():
-    global teams
-    global sheet
-    global players
-    teams = []
-    sheet = 0
-    players = []
+    global _teams
+    global _players
+    _teams = []
+    _players = []
     
-def get_teams():
-    return teams
-
 def get_lines(csv):
     lines = csv.split("\n")
     return lines[1:]
-
-def get_players():
-    return players
 
 def update_current_team(line):
     team_header_pattern = re.compile(r"-{8}")
@@ -250,7 +260,7 @@ def parse_line(line):
     _add_player(player)
 
 def _add_player(player):
-    players.append(player)
+    _players.append(player)
 
 def _dump_player(player):
     "dump players as an formatted csv row"
@@ -278,7 +288,7 @@ def _extract_player(line):
         'tit': split[2],
         'entrees': split[3],
         'buts': split[4],
-        'team': current_team,
+        'team': _current_team,
         'note': _extract_notation(split[6:])
     }
     today_goals = parseNote(":" + player['buts'])
@@ -298,8 +308,8 @@ def _extract_notation(notes_str):
     return notes
 
 def _current_team_set_days(days):
-    for team in teams:
-        if team.short_name != current_team:
+    for team in _teams:
+        if team.short_name != _current_team:
             continue
         team.days = days
 
@@ -376,6 +386,7 @@ def _extract_opposition(line):
     "extract days{'day', 'location', 'opponentTeam'} form a csv line"
     cells = line.split(',')
     days = []
+    day_regex = re.compile(_day_regex)
     for cell in cells:
         if not day_regex.match(cell):
             continue
@@ -406,8 +417,8 @@ def xlsx_to_csv(filename):
     return output.getvalue()
 
 def set_current_team(team):
-    global current_team
-    current_team = team
+    global _current_team
+    _current_team = team
         
 if __name__ == "__main__":
     print(xlsx_to_csv("Stats MPG-saison4MPG.xlsx"))

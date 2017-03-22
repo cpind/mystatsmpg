@@ -101,7 +101,7 @@ def test_parseNote():
 
 def assert_note_equal(s, values):
     note = statsmpg.parseNote(s)
-    expe = statsmpg.Note(**values)
+    expe = statsmpg.note(**values)
     assert note.__dict__ == expe.__dict__
     
 
@@ -110,7 +110,7 @@ def _test_players_prop(property):
     global csv
     names_from_json = _get_json("players.json", property)
     statsmpg.init(csv)
-    teams_from_csv = statsmpg.get_players()
+    teams_from_csv = statsmpg._players
     names_from_csv = extract_names(teams_from_csv, property)
     assert names_from_csv == names_from_json
 
@@ -131,7 +131,7 @@ def _get_csv():
 def assert_get_teams(property):
     names_from_json = _get_json("teams.json", property)
     statsmpg.init(csv)
-    teams_from_csv = statsmpg.get_teams()
+    teams_from_csv = statsmpg._teams
     names_from_csv = extract_names(teams_from_csv, property)
     assert names_from_csv == names_from_json
 
