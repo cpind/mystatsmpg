@@ -17,10 +17,10 @@ setup(
     long_description="",
     url='https://github.com/cpind/mystatsmpg',
     # Author details
-    author='Cpind',
+    author='cpind',
     author_email='cyprien.pindat@gmail.com',
     # Choose your license
     license='MIT',
     keywords='openpyxl stats football',
-    packages=find_packages(exclude=['test*', 'data']),
+#    packages=find_packages(exclude=['test*', 'data']),
 )
