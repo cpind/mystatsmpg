@@ -1,17 +1,27 @@
+#here goes the Copyright (c)
+
+#Python stdlib imports
 import re
-import openpyxl
 import csv
 import io
 
+#uses openpyxl for reading excel 
+import openpyxl
+
+
+#Constants
 __csv__player__columns = ['poste', 'nom', 'tit', 'entrees', 'buts', 'team']
 __csv__team__columns = ['sheet', 'name', 'short_name']
 
+#Regex
 team_regex = re.compile(r"-{8}[^0-9]*([0-9]*)[^A-Z]*([A-Z]*).*\n([^,]*)", re.M)
 day_regex = re.compile(r'J[0-9]{2}')
 
+#MPG constants
 _entered_string = "<"
 _injured_string = "Bl."
 
+#internals
 teams = []
 players = []
 sheet = 0
@@ -19,14 +29,22 @@ current_team = ""
 _current_day = 1
 _days = []
 
+
+
 class Team:
+    """Team contains all team related properties """
+
     def __init__(self, sheet, name, short_name, days=[]):
         self.sheet = sheet
         self.name = name
         self.short_name = short_name
         self.days = days
 
+
+        
 class Note:
+    """Note contains all notation related properties"""
+    
     def __init__(
             self,
             note = None,
