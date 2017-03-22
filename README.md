@@ -9,5 +9,5 @@ Installation
 Run tests
 ---------
 
-    pytest test_sample.py
+    pytest test_pystatsmpg.py
 
