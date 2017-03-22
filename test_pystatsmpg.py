@@ -5,8 +5,8 @@ from unittest.mock import patch, call
 
 
 #Constants
-csv_filename = "Stats MPG-saison4MPG.csv"
-xlsx_filename = "Stats MPG-saison4MPG.xlsx"
+csv_filename = "data/Stats MPG-saison4MPG.csv"
+xlsx_filename = "data/Stats MPG-saison4MPG.xlsx"
 players_json_filename = "data/players.json"
 teams_json_filename = "data/teams.json"
 
@@ -139,7 +139,7 @@ def _get_json(file, property):
     
 
 def _get_csv():
-    with open("Stats MPG-saison4MPG.csv", "r") as csv_file:
+    with open(csv_filename, "r") as csv_file:
         csv = csv_file.read()
         return csv
     
