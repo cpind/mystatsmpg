@@ -115,6 +115,19 @@ class Note:
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
+
+class Player:
+    """Player contains all player related properties """
+
+    def __init__(self):
+        self.poste = ""
+        self.nom = ""
+        self.tit = ""
+        self.entrees = ""
+        self.buts = ""
+        self.team = ""
+        self.note = []
+
 #creators
 def team(sheet, name, short_name):
     "Create a Team"
@@ -141,6 +154,25 @@ def note(
     return n
 
 
+def player(
+        poste = "",
+        nom = "",
+        tit = "",
+        entrees = "",
+        buts = "",
+        team = "",
+        note = []):
+    p = Player()
+    p.poste = poste
+    p.nom = nom
+    p.tit = tit
+    p.entrees = entrees
+    p.buts = buts
+    p.team = team
+    p.note = note
+    return p
+
+
 #internals
 def _update_players(players_csv):
     lines = players_csv.split("\n")[1:]
@@ -158,13 +190,16 @@ def _update_player(player_tokens):
         i = i + 1
     p = _get_or_create_player(player)
     for prop in player:
-        p[prop] = player[prop]
-    p['note'] = [_parse_note(token) for token in player_tokens[6:]]
+        setattr(p, prop, player[prop])
+    p.note = [_parse_note(token) for token in player_tokens[6:]]
 
 
+__player_id_properties__ = ['poste', 'nom', 'team']
+
+    
 def _are_same_player(player, other):
-    for prop in ['poste', 'nom', 'team']:
-        if other[prop] != player[prop]:
+    for prop in __player_id_properties__:
+        if other[prop] != getattr(player, prop):
             return False
     return True
    
@@ -173,8 +208,11 @@ def _get_or_create_player(player):
     for p in _players:
         if _are_same_player(p, player):
             return p
-    _players.append(player)
-    return player
+    p = Player()
+    for prop in __player_id_properties__:
+        setattr(p, prop, player[prop])
+    _players.append(p)
+    return p
     
 
 def _update_teams(teams_csv):
@@ -294,17 +332,13 @@ def _parse_line(line):
     if not re.match(r'^[GDMA],', line):
         return
     player = _extract_player(line)
-    _add_player(player)
-
-
-def _add_player(player):
     _players.append(player)
 
 
 def _dump_player(player):
     "dump players as an formatted csv row"
-    dump = [ player[c] for c in __csv__player__columns]
-    for note in player['note']:
+    dump = [ getattr(player,c) for c in __csv__player__columns]
+    for note in player.note:
         dump.append(_dump_note(note))
     return ",".join(dump)
 
@@ -324,7 +358,7 @@ def _dump_day(day):
 def _extract_player(line):
     "extract players from an mpg csv line"
     split = line.split(',')
-    player = {
+    p = player(**{
         'poste':split[0],
         'nom': split[1],
         'tit': split[2],
@@ -332,11 +366,11 @@ def _extract_player(line):
         'buts': split[4],
         'team': _current_team,
         'note': _extract_notation(split[6:])
-    }
-    today_goals = _parse_note(":" + player['buts'])
-    today_note = player['note'][_current_day]
+    })
+    today_goals = _parse_note(":" + p.buts)
+    today_note = p.note[_current_day]
     _set_goals_from(today_note, today_goals)
-    return player
+    return p
 
 
 def _set_goals_from(note, other):

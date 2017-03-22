@@ -7,8 +7,8 @@ from unittest.mock import patch, call
 #Constants
 csv_filename = "Stats MPG-saison4MPG.csv"
 xlsx_filename = "Stats MPG-saison4MPG.xlsx"
-players_json_filename = "players.json"
-teams_json_filename = "teams.json"
+players_json_filename = "data/players.json"
+teams_json_filename = "data/teams.json"
 
 
 #Setup
@@ -35,11 +35,15 @@ def test_get_teams_should_get_sheet():
     assert_get_teams('sheet')
 
 
+def test_get_players_should_get_nom():
+    assert_get_players('nom')
+
+
 @patch('statsmpg._set_current_team')
 def test_parseLine(mockMethod):
     for line in statsmpg._get_lines(csv):
         statsmpg._update_current_team(line)
-    short_from_json = _get_json_array("teams.json", 'short_name')
+    short_from_json = _get_json_array(teams_json_filename, 'short_name')
     assert mockMethod.call_count == len(short_from_json)
     mockMethod.assert_has_calls(map(call, short_from_json))
 
@@ -100,21 +104,20 @@ def test_parse_note():
 
 
 
-def _test_players_prop(property):
-    global csv
-    names_from_json = _get_json("players.json", property)
+#Asserts
+def assert_get_teams(property):
+    names_from_json = _get_json(teams_json_filename, property)
     statsmpg.init(csv)
-    teams_from_csv = statsmpg._players
+    teams_from_csv = statsmpg._teams
     names_from_csv = extract_names(teams_from_csv, property)
     assert names_from_csv == names_from_json
 
 
-#Asserts
-def assert_get_teams(property):
-    names_from_json = _get_json("teams.json", property)
+def assert_get_players(property):
+    names_from_json = _get_json(players_json_filename, property)
     statsmpg.init(csv)
-    teams_from_csv = statsmpg._teams
-    names_from_csv = extract_names(teams_from_csv, property)
+    players_from_csv = statsmpg._players
+    names_from_csv = extract_names(players_from_csv, property)
     assert names_from_csv == names_from_json
 
 
