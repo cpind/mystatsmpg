@@ -1,0 +1,19 @@
+# Byte-compiled
+*__pycache__*
+*.pyc
+
+#emacs temporary files
+*~
+\#*#
+*#
+\.\#*
+
+#virtual env
+.env
+venv
+
+#macos specific
+\.DS_Store
+
+# unit test coverage report
+.cache

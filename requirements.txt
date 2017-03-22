@@ -1,0 +1,13 @@
+appdirs==1.4.3
+django-realtime==1.1
+et-xmlfile==1.0.1
+httplib2==0.9
+jdcal==1.3
+numpy==1.9.2
+openpyxl==2.4.5
+packaging==16.8
+py==1.4.33
+pyparsing==2.2.0
+pyserial==2.7
+pytest==3.0.7
+six==1.10.0
