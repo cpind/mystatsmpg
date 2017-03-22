@@ -22,5 +22,5 @@ setup(
     # Choose your license
     license='MIT',
     keywords='openpyxl stats football',
-    packages=['pystatsmpg'],
+    packages=['.'],
 )
