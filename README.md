@@ -1,4 +1,4 @@
-# mystatsmpg
+# pystatsmpg
 pystatsmpg is a python library to read football stats provided by http://statsl1mpg.over-blog.com/. 
 
 It allows to export data to csv.
