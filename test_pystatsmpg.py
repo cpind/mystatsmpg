@@ -3,9 +3,17 @@ import statsmpg
 
 from unittest.mock import patch, call
 
-csv = ""
+
+#Constants
 csv_filename = "Stats MPG-saison4MPG.csv"
 xlsx_filename = "Stats MPG-saison4MPG.xlsx"
+players_json_filename = "players.json"
+teams_json_filename = "teams.json"
+
+
+#Setup
+csv = ""
+
 
 def setup_function():
     "test init function"
@@ -13,11 +21,15 @@ def setup_function():
     csv = _get_csv()
     statsmpg.clear()
 
+
+#Specs
 def test_get_teams_should_get_team_names():
     assert_get_teams('name')
 
+
 def test_get_teams_should_get_short_names():
     assert_get_teams('short_name')
+
 
 def test_get_teams_should_get_sheet():
     assert_get_teams('sheet')
@@ -40,6 +52,7 @@ def test_extract_opposition():
     assert days[4]['location'] == 'D'
     assert days[4]['opponentTeam'] == 'OL'
 
+
 def test_init_should_set_current_day():
     statsmpg.init(csv)
     assert statsmpg._current_day == 28
@@ -53,6 +66,7 @@ def test_clear():
     teams, players = statsmpg.dump()
     assert len(teams.split('\n')) > 1
     
+
 def test_update_with_dumps():
     statsmpg.update(csv)
     teams, players = statsmpg.dump()
@@ -65,6 +79,7 @@ def test_update_with_dumps():
     assert count_lines(players) == count_lines(players_)
     assert players == players_
 
+
 def test_xlsx_to_csv():
     statsmpg.update_xlsx(xlsx_filename)
     teams, players = statsmpg.dump()
@@ -75,11 +90,6 @@ def test_xlsx_to_csv():
     assert players == p2
 
     
-    
-def count_lines(dump):
-    return len(dump.split('\n'))
-    
-
 def test_parse_note():
     assert_note_equal("2", {'entered':True, 'note':2, 'goals_neg':None})
     assert_note_equal("2:(-2)",{'entered':True, 'note':2, 'goals_pos':None, 'goals_neg':-2})
@@ -88,13 +98,8 @@ def test_parse_note():
     assert_note_equal("<",{'entered': True})
     assert_note_equal(":2(-3)",{'entered':False, 'note':None, 'goals_pos':2, 'goals_neg':-3})
 
-def assert_note_equal(s, values):
-    note = statsmpg._parse_note(s)
-    expe = statsmpg.note(**values)
-    assert note.__dict__ == expe.__dict__
-    
 
-    
+
 def _test_players_prop(property):
     global csv
     names_from_json = _get_json("players.json", property)
@@ -104,19 +109,7 @@ def _test_players_prop(property):
     assert names_from_csv == names_from_json
 
 
-def _get_json_array( file, property):
-    with open(file, "r") as json_file:
-        teams_from_json = json.load(json_file)
-        return [team[property] for team in teams_from_json]
-    
-def _get_json(file, property):
-    return json.dumps(_get_json_array(file, property))
-    
-def _get_csv():
-    with open("Stats MPG-saison4MPG.csv", "r") as csv_file:
-        csv = csv_file.read()
-        return csv
-    
+#Asserts
 def assert_get_teams(property):
     names_from_json = _get_json("teams.json", property)
     statsmpg.init(csv)
@@ -124,13 +117,41 @@ def assert_get_teams(property):
     names_from_csv = extract_names(teams_from_csv, property)
     assert names_from_csv == names_from_json
 
+
+def assert_note_equal(s, values):
+    note = statsmpg._parse_note(s)
+    expe = statsmpg.note(**values)
+    assert note.__dict__ == expe.__dict__
+    
+
+#Internals
+def _get_json_array( file, property):
+    with open(file, "r") as json_file:
+        teams_from_json = json.load(json_file)
+        return [team[property] for team in teams_from_json]
+    
+
+def _get_json(file, property):
+    return json.dumps(_get_json_array(file, property))
+    
+
+def _get_csv():
+    with open("Stats MPG-saison4MPG.csv", "r") as csv_file:
+        csv = csv_file.read()
+        return csv
+    
+
 def extract_names_array(team_list, property='name', **keywords):
     return list(map(lambda team: getattr(team,property), team_list))
+
 
 def extract_names(team_list, property='name', **keywords):
     return json.dumps(extract_names_array(team_list, property))
 
 
+def count_lines(dump):
+    return len(dump.split('\n'))
+    
                                             
 
     
