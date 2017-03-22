@@ -10,7 +10,7 @@ Installation
 Usage
 -----
 
-   python -m pystatsmpg.py stats file.xlsx
+    python -m pystatsmpg.py stats file.xlsx
 
 Will extract data from file.xlsx and store csv dumps for teams and players in the stas directory. When run another time with file from next day, will update data in stats, keeping track of dayly goals
 
