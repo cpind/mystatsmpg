@@ -431,7 +431,6 @@ def _dump_day(day):
     return day['day'] + " (" + day['location'] + "): " + day['opponentTeam']
 
 
-
 def _extract_player(line):
     "extract players from an mpg csv line"
     split = line.split(',')
