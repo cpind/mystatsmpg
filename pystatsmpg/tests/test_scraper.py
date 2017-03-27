@@ -1,7 +1,9 @@
 from unittest.mock import patch
-
-import scaper
 import feedparser
+
+
+from pystatsmpg import scraper 
+
 
 _rss_xml_file = "data/rss.xml"
 _rss = ""
@@ -14,7 +16,7 @@ _hrefs = [{
 }]
 
 def test_get_feeds():
-    entries = provider.get_feeds()
+    entries = scraper.get_feeds()
     assert len(entries) == 2
 
 
@@ -27,7 +29,7 @@ def test_greater_than():
 
 
 def test_get_greaterthan():
-    entries = provider.get_feeds(greaterthan={'pl':29})
+    entries = scraper.get_feeds(greaterthan={'pl':29})
     assert len(entries) == 1
 
 
@@ -36,27 +38,27 @@ def test_get_hrefs():
         pass
     entry = Entry()
     entry.link = _hrefs[0]['link']
-    hrefs = provider._get_hrefs({'entry':entry})
+    hrefs = scraper._get_hrefs({'entry':entry})
     assert hrefs == _hrefs[0]['hrefs']
     
 
 def test__get_stats_should_return_3_stats():
-    f = provider.get_feeds()
-    stats = provider._get_stats(f[0])
+    f = scraper.get_feeds()
+    stats = scraper._get_stats(f[0])
     assert type(stats) is list
     assert len(stats) == 2
-    assert type(stats[0]) is provider.StatsMPG
+    assert type(stats[0]) is scraper.StatsMPG
 
     
 def test_getstats_should_return_3_stats():
-    stats =  provider.getstats()
+    stats =  scraper.getstats()
     assert len(stats) == 3
-    assert type(stats[0]) is provider.StatsMPG
+    assert type(stats[0]) is scraper.StatsMPG
 
 
 #asserts
 def assert_greater_than(feed, than, result):
-    assert provider._is_greater_than(feed, than) == result
+    assert scraper._is_greater_than(feed, than) == result
     
 
 def get_hrefs(publication):
@@ -82,5 +84,5 @@ def setup_module(parsemock):#, get_contentmock):
     with open(_rss_xml_file, 'r') as f:
         _rss = f.read()
     #could not have @patch to actually patch _get_hrefs
-    provider._get_hrefs = get_hrefs
-    provider._content = get_content
+    scraper._get_hrefs = get_hrefs
+    scraper._content = get_content

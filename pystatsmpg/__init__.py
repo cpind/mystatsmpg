@@ -1,4 +1,4 @@
-import store
+from . import store
 
 
 def update(stats):

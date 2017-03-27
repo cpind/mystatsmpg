@@ -1,7 +1,9 @@
 import json
-import pystatsmpg.store as pystatsmpg
-
 from unittest.mock import patch, call
+
+from  pystatsmpg import store as pystatsmpg
+
+
 
 
 #Constants
