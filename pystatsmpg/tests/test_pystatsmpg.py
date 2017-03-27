@@ -4,8 +4,6 @@ from unittest.mock import patch, call
 from  pystatsmpg import store as pystatsmpg
 
 
-
-
 #Constants
 csv_filename = "data/J28/Stats MPG-saison4MPG.csv"
 xlsx_filename = "data/J28/Stats MPG-saison4MPG.xlsx"
