@@ -1,5 +1,5 @@
 import json
-import pystatsmpg
+import pystatsmpg.store as pystatsmpg
 
 from unittest.mock import patch, call
 
@@ -40,7 +40,7 @@ def test_get_players_should_get_nom():
     assert_get_players('nom')
 
 
-@patch('pystatsmpg._set_current_team')
+@patch('pystatsmpg.store._set_current_team')
 def test_parseLine(mockMethod):
     for line in pystatsmpg._get_lines(csv):
         pystatsmpg._update_current_team(line)
