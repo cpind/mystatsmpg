@@ -8,14 +8,78 @@ import re
 import oauth2client
 import httplib2
 from apiclient import discovery
+from enum import Enum
 
 "for command line use"
 _storage_directory = "~/.pystatsmpg/"
 _client_secret_file_ = 'mtb.json'
 
 
-def get_feeds():
-    f = feedparser.parse('http://statsl1mpg.over-blog.com/rss')
+
+class League(Enum):
+    L1 = 1
+    PL = 2
+
+
+class Notation(Enum):
+    MPG = 1
+    LEQUIPE = 2
+    
+class StatsMPG():
+
+    def __init__(self, day, feedlink, bitly, driveid, content, filename):
+        self.day = day
+        self.feedlink = "http://blabla"
+        self.bitly = bitly
+        self.driveid = driveid
+        #xlsx file content
+        self.content = content
+        self.filename = filename
+
+    def get_leaguename(self):
+        if _is_l1(self):
+            return 'l1'
+        return 'pl'
+
+
+def getstats(greaterthan={}):
+    """
+    retrives the latest StatsMPG whose days are greater than days specified in greaterthan argument.
+    greaterthan argument is provided as follow {'l1':30, 'pl':29}
+    """
+    feeds = get_feeds(greaterthan=greaterthan)
+    stats = []
+    for f in feeds:
+        stats += _get_stats(f)
+    return [stat for stat in stats if _is_greater_than(stat, greaterthan)]
+
+
+def _is_stat_greater_than(stat, than):
+    pub = {stat.leaguename:stat.day}
+    return _is_greater_than(pub, than)
+
+
+def _is_greater_than(feed, than):
+    for league in than:
+        if than[league] is None:
+            continue
+        if feed[league] is None:
+            continue
+        if feed[league] > than[league]:
+            return True
+        else:
+            return False
+    return True
+
+def _filterfeeds(feeds, greaterthan={}):
+    return [f for f in feeds if _is_greater_than(f, greaterthan)]
+
+
+        
+def get_feeds(greaterthan=None, latest=True, rss = None):
+    if rss is None:
+        rss = 'http://statsl1mpg.over-blog.com/rss'
+    f = feedparser.parse(rss)
     recaps = []
     for e in f.entries:
         pub = _get_days(e.title)
@@ -26,16 +90,20 @@ def get_feeds():
     if len(recaps) == 0:
         print("sorry could not find no Tableau Recap at all!!")
         return
+    if greaterthan is not None:
+        recaps = _filterfeeds(recaps, greaterthan)
+    if latest:
+        recaps = [] + _get_latest(recaps, 'l1') + _get_latest(recaps, 'pl')
     return recaps
 
 
-def parsefeed():
+def parsefeed(feeds=None):
+    if feeds is None:
+        feeds = get_feeds()
     """ read the feed """
-    recaps = get_feeds()
-    latest_l1 = _get_latest(recaps, 'l1')
-    latest_pl = _get_latest(recaps, 'pl')
-    _download(latest_l1)
-    _download(latest_pl)
+    recaps = feeds
+    _download(feeds[0])
+    _download(feeds[1])
 
 
 def _get_hrefs(pub):
@@ -52,15 +120,52 @@ def _is_l1(name):
     return re.match(regex, name) is not None
     
 
-def _download(latest):
-    for href in _get_hrefs(latest):
-        c, fname = _content_(href)
-        if _is_l1(fname):
-            day = latest['l1']
-        else:
-            day = latest['pl']
-        fname = "J{}_{}".format(day, fname)
-        _write_file(c, fname)
+
+def _get_league(filename):
+    if _is_l1(filename):
+        return League.L1
+    return League.PL
+
+
+def _get_day(publication, filename):
+    if _is_l1(filename):
+        return publication['l1']
+    else:
+        return publication['pl']
+
+
+def _get_season(filename):
+    m = re.match(r'.*saison([0-9]+).*', filename, re.I)
+    if m is None:
+        return None
+    return int(m.group(1))
+
+
+def _get_stats(publication):
+    stats = []
+    for href in _get_hrefs(publication):
+        driveid = _drive_file_id(href)
+        c, fname, driveid = _content(href)
+        day = _get_day(publication, fname)
+        season = _get_season(fname)
+        stats.append(StatsMPG(
+            day = _get_day(publication, fname),
+            feedlink = publication['entry'].link,
+            bitly = href,
+            driveid = driveid,
+            content = c,
+            filename = fname,
+        ))
+    return stats
+        
+
+def _download(publication):
+    stats = _get_stats(publication)
+    for stat in stats:
+        c = stat.content
+        fname = stat.filename
+        day = _get_day(publication, fname)
+        _write_file(c, "J{}_{}".format(day, fname))
 
 
 def _write_file(content, name):
@@ -70,16 +175,14 @@ def _write_file(content, name):
         f.write(content)
     
             
-def _content_(url):
+def _content(url):
     fileid = _drive_file_id(url)
     service, http = _service_()
-    print('url:' + url)
-    print('fileid:' + str(fileid))
     file = service.files().get(fileId=fileid).execute()
     filename = file['name']
     url = service.files().get_media(fileId=fileid).uri
     response, content = http.request(url)
-    return content, filename
+    return content, filename, fileid
 
             
 def _drive_file_id(url):
@@ -101,7 +204,11 @@ def _service_():
     
     
 def _get_latest(entries, league):
-    return sorted([p for p in entries if p[league] is not None], key = lambda x: x[league], reverse=True)[0]
+    entries = [p for p in entries if p[league] is not None]
+    s = sorted(entries, key = lambda x: x[league], reverse=True)
+    if len(s) > 0:
+        return [s[0]]
+    return []
 
     
 def _is_stats(title):
