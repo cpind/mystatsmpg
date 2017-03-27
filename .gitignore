@@ -20,3 +20,6 @@ venv
 
 #remove google api key
 mtb.json
+
+#build
+dist
