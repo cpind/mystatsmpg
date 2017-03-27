@@ -17,3 +17,6 @@ venv
 
 # unit test coverage report
 .cache
+
+#remove google api key
+mtb.json
