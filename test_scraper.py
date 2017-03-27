@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-import provider
+import scaper
 import feedparser
 
 _rss_xml_file = "data/rss.xml"
