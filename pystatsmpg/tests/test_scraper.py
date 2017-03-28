@@ -42,13 +42,25 @@ def test_get_hrefs():
     assert hrefs == _hrefs[0]['hrefs']
     
 
-def test__get_stats_should_return_3_stats():
+def _get_stats():
     f = scraper.get_feeds()
     stats = scraper._get_stats(f[0])
+    return stats
+
+    
+def test__get_stats_should_return_3_stats():
+    stats = _get_stats()
     assert type(stats) is list
     assert len(stats) == 2
     assert type(stats[0]) is scraper.StatsMPG
 
+
+def test__stats_notation():
+    stats = _get_stats()
+    assert stats[0].get_season() == 4
+    assert stats[0].get_leaguename() == "l1"
+    assert stats[0].get_notation() == "MPG"
+    
     
 def test_getstats_should_return_3_stats():
     stats =  scraper.getstats()
@@ -56,6 +68,7 @@ def test_getstats_should_return_3_stats():
     assert type(stats[0]) is scraper.StatsMPG
 
 
+    
 #asserts
 def assert_greater_than(feed, than, result):
     assert scraper._is_greater_than(feed, than) == result
@@ -76,7 +89,8 @@ def get_content(url):
         'http://bit.ly/2n3Hg3V': 'Stats MPG-saison1PL.xlsx'}
     return None, drivenames.get(url, ""), None
 
-    
+
+
 #setup
 @patch('feedparser.parse', return_value=feedparser.parse(_rss_xml_file))
 def setup_module(parsemock):#, get_contentmock):
