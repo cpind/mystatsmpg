@@ -61,11 +61,11 @@ def getstats(greaterthan={}):
     stats = []
     for f in feeds:
         stats += _get_stats(f)
-    return [stat for stat in stats if _is_greater_than(stat, greaterthan)]
+    return [stat for stat in stats if _is_stat_greater_than(stat, greaterthan)]
 
 
 def _is_stat_greater_than(stat, than):
-    pub = {stat.leaguename:stat.day}
+    pub = {stat.get_leaguename():stat.day}
     return _is_greater_than(pub, than)
 
 
@@ -73,6 +73,8 @@ def _is_greater_than(feed, than):
     for league in than:
         if than[league] is None:
             continue
+        if league not in feed:
+            continue    
         if feed[league] is None:
             continue
         if feed[league] > than[league]:

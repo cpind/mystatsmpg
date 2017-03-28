@@ -55,6 +55,10 @@ def test__get_stats_should_return_3_stats():
     assert type(stats[0]) is scraper.StatsMPG
 
 
+def test__get_stats_greaterthan():
+    stats = scraper.getstats(greaterthan={'l1':28})
+    
+
 def test__stats_notation():
     stats = _get_stats()
     assert stats[0].get_season() == 4
