@@ -60,6 +60,7 @@ def test__stats_notation():
     assert stats[0].get_season() == 4
     assert stats[0].get_leaguename() == "l1"
     assert stats[0].get_notation() == "MPG"
+    assert stats[1].get_notation() == "Lequipe"
     
     
 def test_getstats_should_return_3_stats():

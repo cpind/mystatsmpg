@@ -47,7 +47,7 @@ class StatsMPG():
 
     def get_notation(self):
         leaguename = self.get_leaguename()
-        if leaguename == 'pl' or leaguename is not _is_lequipe(self.filename):
+        if leaguename == 'pl' or not _is_lequipe(self.filename):
             return "MPG"
         return "Lequipe"
 
