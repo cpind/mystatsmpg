@@ -29,7 +29,7 @@ class StatsMPG():
 
     def __init__(self, day, feedlink, bitly, driveid, content, filename):
         self.day = day
-        self.feedlink = "http://blabla"
+        self.feedlink = fieedlink
         self.bitly = bitly
         self.driveid = driveid
         #xlsx file content
