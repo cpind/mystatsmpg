@@ -37,10 +37,18 @@ class StatsMPG():
         self.filename = filename
 
     def get_leaguename(self):
-        if _is_l1(self):
+        if _is_l1(self.filename):
             return 'l1'
         return 'pl'
 
+    def get_season(self):
+        return _get_season(self.filename)
+
+
+    def get_notation(self):
+        if self.leaguename == 'pl' or is not _is_lequipe(self.name):
+            return "MPG"
+        return "Lequipe"
 
 def getstats(greaterthan={}):
     """
@@ -115,10 +123,14 @@ def _get_hrefs(pub):
     return [PyQuery(i)('a').attr('href') for i in li]
 
 
-def _is_l1(name):
+def _is_l1(name)
     regex = r'.*(Lequipe|MPG)\.xlsx'
     return re.match(regex, name) is not None
     
+
+def _is_lequipe(name):
+    regex = r'.*Lequipe\.xlsx'
+    return re.match(regex,name) is not None
 
 
 def _get_league(filename):
