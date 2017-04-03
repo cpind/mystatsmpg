@@ -553,6 +553,7 @@ def _parse_day(day_mpg):
     }
 
 
+
 def _set_current_team(team):
     global _current_team
     _current_team = team
