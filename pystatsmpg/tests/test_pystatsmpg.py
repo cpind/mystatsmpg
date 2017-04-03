@@ -5,10 +5,7 @@ from  pystatsmpg import store as pystatsmpg
 import os
 
 
-
-
-def _filepath(filename):
-    return os.path.join(os.path.dirname(__file__), "../../" + filename)
+from pystatsmpg.tests.helper import _filepath
 
 
 #Constants
@@ -168,31 +165,31 @@ def test_with_goals_should_be_dumped():
 
 def test_players_have_goals():
     pystatsmpg.update_xlsx(j28_filename)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
     teams, players = pystatsmpg.dump()
     pystatsmpg.clear()
     pystatsmpg.update(teams=teams, players = players)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
 
 
 def test_players_remember_goals():
     pystatsmpg.update_xlsx(j28_filename)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
     pystatsmpg.update_xlsx(j30_filename)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
     teams, players = pystatsmpg.dump()
     pystatsmpg.clear()
     pystatsmpg.update(teams=teams, players = players)
     t2, p2 = pystatsmpg.dump()
     assert count_lines(players) == count_lines(p2)
     assert players == p2
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
 
 
 def test_players_consolidate_goals_previous_day():
     pystatsmpg.update_xlsx(j30_filename)
     pystatsmpg.update_xlsx(j28_filename)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
 
 
 def test_players_consolidate_goals_previous_day_after_dump():
@@ -201,20 +198,10 @@ def test_players_consolidate_goals_previous_day_after_dump():
     pystatsmpg.clear()
     pystatsmpg.update(teams=teams, players=players)
     pystatsmpg.update_xlsx(j28_filename)
-    assert_goals_of_day_28_in_store()
+    assert pystatsmpg._players[3].note[27].goals_pos == 1
     assert pystatsmpg._days[27].with_goals == True
-
-
-def test_goals_of_previous_days_persisted_when_provided_by_dumped():
-    pystatsmpg.update_xlsx(j28_filename)
-    pystatsmpg.update_xlsx(j30_filename)
-    teams, players = pystatsmpg.dump()
-    pystatsmpg.clear()
-    pystatsmpg.update_xlsx(j30_filename)
-    assert_goals_of_day_28_in_store(False)
-    pystatsmpg.update(teams=teams, players=players)
-    assert_goals_of_day_28_in_store()
-
+    
+    
 #Asserts
 def assert_get_teams(property):
     names_from_json = _get_json(teams_json_filename, property)
@@ -241,13 +228,6 @@ def assert_note_equal(s, values):
 def assert_days_without_goals_except(daysindexes):
     days = pystatsmpg._days
     assert [d.with_goals for d in days] == [ True if i + 1 in daysindexes else False  for i in range(30)]
-
-
-def assert_goals_of_day_28_in_store(in_store=True):
-    assert pystatsmpg._days[27].with_goals == in_store
-    goals_pos = 1 if in_store else None
-    assert pystatsmpg._players[3].note[27].goals_pos == goals_pos
-    
 
     
 #Internals

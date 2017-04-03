@@ -197,6 +197,8 @@ def _update_players(players_csv):
     lines = players_csv.split("\n")
     _update_days_from_header_line(lines[0])
     for line in lines[1:]:
+        if line is '':
+            continue
         _update_player(line.split(','))
 
 
@@ -239,11 +241,15 @@ def _update_teams(teams_csv):
     "return array of lines skipping the header"
     lines = teams_csv.split("\n")
     for line in lines[1:]:
+        if line is '':
+            continue
         _update_team(line.split(','))
     _update_days()
 
 
 def _update_days():
+    if len(_teams) == 0:
+        return
     days = _teams[0].days
     if len(days) == 0:
         return
@@ -251,7 +257,7 @@ def _update_days():
         for d in range(len(_days), len(days)):
             _days.append(dayheader(days[d]['day'], False))
     #current last day always have goals
-    _days[_current_day-1].with_goals = True
+    #_days[_current_day-1].with_goals = True
 
 
 def _update_days_from_header_line(line):
@@ -371,9 +377,11 @@ def dump_teams():
 def _init():
     global _teams
     global _players
+    global _current_day
     _teams = []
     _players = []
     del _days[:]
+    _current_day = 0
     
 
 def _get_lines(csv):
@@ -398,7 +406,7 @@ def _parse_line(line):
         days = _extract_opposition(line)
         _current_team_set_days(days)
         _update_days()
-#        _days[_current_day-1].with_goals = True
+        _days[_current_day-1].with_goals = True
         return
     #skip all none notation line
     if not re.match(r'^[GDMA],', line):
@@ -551,7 +559,6 @@ def _parse_day(day_mpg):
         'location':tokens[1],
         'opponentTeam':tokens[2]
     }
-
 
 
 def _set_current_team(team):

@@ -1,11 +1,12 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import feedparser
 
 
-from pystatsmpg import scraper 
+from pystatsmpg import scraper
+from pystatsmpg.tests.helper import _filepath
 
 
-_rss_xml_file = "data/rss.xml"
+_rss_xml_file = _filepath("data/rss.xml")
 _rss = ""
 _hrefs = [{
     'link': 'http://statsl1mpg.over-blog.com/2017/03/tableaux-recap-j30.html?utm_source=flux&utm_medium=flux-rss&utm_campaign=sports',
@@ -97,7 +98,8 @@ def get_content(url):
 
 
 #setup
-@patch('feedparser.parse', return_value=feedparser.parse(_rss_xml_file))
+#@patch('feedparser.parse', return_value=feedparser.parse(_rss_xml_file))
+#@patch('feedparser.parse', return_value="yep")
 def setup_module(parsemock):#, get_contentmock):
     global _rss
     with open(_rss_xml_file, 'r') as f:
@@ -105,3 +107,4 @@ def setup_module(parsemock):#, get_contentmock):
     #could not have @patch to actually patch _get_hrefs
     scraper._get_hrefs = get_hrefs
     scraper._content = get_content
+    feedparser.parse = MagicMock(return_value=feedparser.parse(_rss_xml_file))
