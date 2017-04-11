@@ -50,6 +50,7 @@ def test_parseLine(mockMethod):
         pystatsmpg._update_current_team(line)
     short_from_json = _get_json_array(teams_json_filename, 'short_name')
     assert mockMethod.call_count == len(short_from_json)
+    print(short_from_json)
     mockMethod.assert_has_calls(map(call, short_from_json))
 
     

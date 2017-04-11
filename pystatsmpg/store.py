@@ -26,7 +26,7 @@ _injured_string = "Bl."
 
 
 #Regex
-_team_regex = r"-{8}[^0-9]*([0-9]*)[^A-Z]*([A-Z]*).*\n([^,]*)"
+_team_regex = r"-{8}[^0-9]*([0-9]*)[^A-Z]*([a-zA-Z]*).*\n([^,]*)"
 _day_regex = r"J[0-9]{2}"
 
 
@@ -391,7 +391,7 @@ def _get_lines(csv):
 
 def _update_current_team(line):
     team_header_pattern = re.compile(r"-{8}")
-    name_pattern = re.compile(r'[A-Z]+')
+    name_pattern = re.compile(r'[A-Za-z]+')
     if team_header_pattern.match(line):
         _set_current_team(name_pattern.search(line).group())
 
